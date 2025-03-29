@@ -15,7 +15,9 @@ jobs:
           go-version: '1.22'
       - name: Build
         run: go build ./cmd/inventory
-      - name: Test
-        run: go test ./...
       - name: Docker Build
         run: docker build -t inventory .
+      - name: Start PostgreSQL
+        run: docker run -d --name postgres -e POSTGRES_PASSWORD=password -p 5432:5432 postgres:15
+      - name: Run Tests
+        run: go test ./... -v
