@@ -3,11 +3,12 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
+	"inventory/internal/inventory"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
 	"github.com/stretchr/testify/assert"
-	"github.com/tranngocphu/inventory/internal/inventory"
 )
 
 func TestCreateItem(t *testing.T) {

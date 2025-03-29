@@ -1,4 +1,4 @@
-module github.com/tranngocphu/inventory
+module inventory
 
 go 1.22.2
 
