@@ -22,6 +22,9 @@ func main() {
 
 	r := mux.NewRouter()
 	// Define routes and route handlers
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Home"))
+	})
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})
