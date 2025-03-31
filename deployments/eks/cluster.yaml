@@ -13,18 +13,7 @@ managedNodeGroups:
     maxSize: 1
     desiredCapacity: 1
     spot: true  # Valid in managedNodeGroups
-    maxPodsPerNode: 17  # Still applies
-    # preBootstrapCommands:
-    #   - "aws ec2 authorize-security-group-ingress --group-id $(aws ec2 describe-security-groups --filters Name=tag:eksctl.cluster,Name=${metadata.name} --query 'SecurityGroups[0].GroupId' --output text) --protocol tcp --port 30080 --cidr 0.0.0.0/0 --region ${AWS_REGION}"
-    additionalSecurityGroups:
-      - name: inventory-node-sg
-        create: true
-        ingressRules:
-          - description: "Allow NodePort 30080 from anywhere"
-            protocol: tcp
-            fromPort: 30080
-            toPort: 30080
-            cidr: "0.0.0.0/0"
+    maxPodsPerNode: 17  # Still applies    
 addons:
   - name: vpc-cni
     version: latest
