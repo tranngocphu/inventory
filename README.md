@@ -1,4 +1,4 @@
-# Inventory System
+# Inventory System (WIP)
 
 Welcome to the **Inventory System**—a slick, cloud-native app that makes stock management a breeze! Powered by AWS EKS and GitHub Actions, this project blends a Go backend with PostgreSQL to track your inventory in style. Whether you’re managing a small shop or experimenting with Kubernetes, this system delivers efficiency and scalability—all on a budget-friendly Spot instance. Push code, test it, deploy when you’re ready—total control in your hands!
 
