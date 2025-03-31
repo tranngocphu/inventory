@@ -76,15 +76,19 @@ jobs:
             exit 1
           fi
 
-          # Check if SG already exists
+          # Define SG name with run ID for uniqueness
           SG_NAME="inventory-eks-nodes-${{ github.run_id }}"
-          SG_ID=$(aws ec2 describe-security-groups --region ${{ env.AWS_REGION }} --filters Name=group-name,Values=$SG_NAME --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null || echo "")
-          
-          if [ -z "$SG_ID" ]; then
-            # Create SG
+
+          # Check if SG exists (capture output explicitly)
+          SG_ID=$(aws ec2 describe-security-groups --region ${{ env.AWS_REGION }} --filters Name=group-name,Values=$SG_NAME --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null)
+          if [ "$SG_ID" = "null" ] || [ -z "$SG_ID" ]; then
+            # Create SG if it doesn't exist
             SG_ID=$(aws ec2 create-security-group --group-name $SG_NAME --description "EKS nodes SG for inventory" --vpc-id $VPC_ID --region ${{ env.AWS_REGION }} --query 'GroupId' --output text)
+            if [ -z "$SG_ID" ]; then
+              echo "Error: Failed to create security group"
+              exit 1
+            fi
             aws ec2 create-tags --resources $SG_ID --tags Key=Name,Value=$SG_NAME --region ${{ env.AWS_REGION }}
-            # Add inbound rule
             aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port 30080 --cidr 0.0.0.0/0 --region ${{ env.AWS_REGION }}
             echo "Created SG: $SG_ID"
           else
