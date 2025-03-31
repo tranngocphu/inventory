@@ -1,0 +1,1 @@
+curl -X POST -H "Content-Type: application/json" -d '{"name":"Shirt","stock":100}' http://54.167.45.62:30080/items

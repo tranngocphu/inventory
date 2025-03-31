@@ -1,0 +1,33 @@
+name: Unit Tests
+
+on:
+  push:
+    branches:
+      - "*"  # Runs on every push to any branch
+  pull_request:
+    branches:
+      - "*"  # Runs on PRs to any branch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      
+      - name: Build
+        run: go build ./cmd/inventory
+      
+      - name: Docker Build
+        run: docker build -t inventory:latest -f docker/Dockerfile .
+      
+      - name: Start PostgreSQL
+        run: docker run -d --name postgres -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} -p 5432:5432 postgres:17
+      
+      - name: Run Tests
+        run: go test ./... -v
