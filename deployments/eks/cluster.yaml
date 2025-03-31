@@ -14,15 +14,8 @@ managedNodeGroups:
     desiredCapacity: 1
     spot: true  # Valid in managedNodeGroups
     maxPodsPerNode: 17  # Still applies
-    securityGroups:
-      withLocal: true  # Use the default node group security group
-      attachPolicy:
-        - ingressRules:
-            - description: "Allow NodePort 30080 from anywhere"
-              protocol: "tcp"
-              fromPort: 30080
-              toPort: 30080
-              cidr: "0.0.0.0/0"  # Open to all
+    preBootstrapCommands:
+      - "aws ec2 authorize-security-group-ingress --group-id $(aws ec2 describe-security-groups --filters Name=tag:eksctl.cluster,Name=${metadata.name} --query 'SecurityGroups[0].GroupId' --output text) --protocol tcp --port 30080 --cidr 0.0.0.0/0 --region ${AWS_REGION}"
 addons:
   - name: vpc-cni
     version: latest
