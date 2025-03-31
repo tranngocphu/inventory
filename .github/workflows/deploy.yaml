@@ -66,6 +66,44 @@ jobs:
           aws eks list-clusters --region ${{ env.AWS_REGION }}
           aws eks describe-cluster-versions --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} || echo "Expected if cluster not yet created"
 
+      - name: Pre-Create Security Group for Nodes
+        id: create-sg
+        run: |
+          # Get default VPC ID
+          VPC_ID=$(aws ec2 describe-vpcs --region ${{ env.AWS_REGION }} --filters Name=isDefault,Values=true --query 'Vpcs[0].VpcId' --output text)
+          if [ -z "$VPC_ID" ]; then
+            echo "Error: No default VPC found in ${{ env.AWS_REGION }}"
+            exit 1
+          fi
+
+          # Check if SG already exists
+          SG_NAME="inventory-eks-nodes-${{ github.run_id }}"
+          SG_ID=$(aws ec2 describe-security-groups --region ${{ env.AWS_REGION }} --filters Name=group-name,Values=$SG_NAME --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null || echo "")
+          
+          if [ -z "$SG_ID" ]; then
+            # Create SG
+            SG_ID=$(aws ec2 create-security-group --group-name $SG_NAME --description "EKS nodes SG for inventory" --vpc-id $VPC_ID --region ${{ env.AWS_REGION }} --query 'GroupId' --output text)
+            aws ec2 create-tags --resources $SG_ID --tags Key=Name,Value=$SG_NAME --region ${{ env.AWS_REGION }}
+            # Add inbound rule
+            aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port 30080 --cidr 0.0.0.0/0 --region ${{ env.AWS_REGION }}
+            echo "Created SG: $SG_ID"
+          else
+            echo "SG $SG_ID already exists, reusing it"
+          fi
+
+          # Output SG_ID for later steps
+          echo "SG_ID=$SG_ID" >> $GITHUB_OUTPUT
+
+      - name: Update cluster.yaml with Security Group
+        run: |
+          # Backup original cluster.yaml
+          cp deployments/eks/cluster.yaml deployments/eks/cluster.yaml.bak
+          # Use yq to add securityGroups.attachIDs (install yq first)
+          sudo curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+          yq eval '.managedNodeGroups[0].securityGroups.attachIDs = ["${{ steps.create-sg.outputs.SG_ID }}"]' -i deployments/eks/cluster.yaml
+          cat deployments/eks/cluster.yaml  # Debug: Show updated file
+      
       - name: Create or Update EKS Cluster
         run: |
           # Check if cluster exists
