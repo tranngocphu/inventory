@@ -60,6 +60,16 @@ jobs:
           sudo mv /tmp/eksctl /usr/local/bin
           eksctl version
 
+      - name: Create or Update EKS Cluster
+        run: |
+          # Check if cluster exists
+          if eksctl get cluster --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} > /dev/null 2>&1; then
+            echo "Cluster ${{ env.EKS_CLUSTER_NAME }} already exists, skipping creation."
+          else
+            echo "Creating cluster ${{ env.EKS_CLUSTER_NAME }}..."
+            eksctl create cluster -f deployments/eks/cluster.yaml
+          fi
+
       - name: Update kubeconfig
         run: |
           eksctl utils write-kubeconfig --cluster ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
