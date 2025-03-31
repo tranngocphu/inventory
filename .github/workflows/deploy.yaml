@@ -60,6 +60,12 @@ jobs:
           sudo mv /tmp/eksctl /usr/local/bin
           eksctl version
 
+      - name: Debug IAM Permissions
+        run: |
+          aws sts get-caller-identity
+          aws eks list-clusters --region ${{ env.AWS_REGION }}
+          aws eks describe-cluster-versions --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} || echo "Expected if cluster not yet created"
+
       - name: Create or Update EKS Cluster
         run: |
           # Check if cluster exists
