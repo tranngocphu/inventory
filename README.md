@@ -42,6 +42,7 @@ On the top of that, this project is primarily for my self-enrichment! So **USE I
 - [x] Fix `ContainerCreating` delays by switching to `t3.small`.
 - [x] Resolve VPC CNI IP assignment errors with instance upgrade.
 - [x] Open port 30080 in security group for web access.
+- [x] Programmatically create security group to allow access to port 30080 when creating a cluster.
 - [x] Verify homepage accessibility externally.
 - [x] Create IAM user `inventory-eks-deployer` for secure access.
 - [x] Define custom IAM policy for EKS and EC2 permissions.
