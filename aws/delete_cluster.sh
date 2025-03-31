@@ -1,0 +1,1 @@
+eksctl delete cluster --name inventory-cluster --region us-east-1

@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://json-schema.org/draft-07/schema#
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: inventory-cluster
+  region: us-east-1
+# addonsConfig:
+#   disableDefaultAddons: true
+managedNodeGroups:
+  - name: spot-workers
+    instanceType: t3.small
+    minSize: 1
+    maxSize: 1
+    desiredCapacity: 1
+    spot: true  # Valid in managedNodeGroups
+    maxPodsPerNode: 17  # Still applies
+    securityGroups:
+      withLocal: true  # Use the default node group security group
+      attachPolicy:
+        - ingressRules:
+            - description: "Allow NodePort 30080 from anywhere"
+              protocol: "tcp"
+              fromPort: 30080
+              toPort: 30080
+              cidr: "0.0.0.0/0"  # Open to all
+addons:
+  - name: vpc-cni
+    version: latest
+  - name: kube-proxy
+    version: latest
+  - name: coredns
+    version: latest
+    configurationValues: |
+      replicaCount: 1  # Minimize to 1 pod
