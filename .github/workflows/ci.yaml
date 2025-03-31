@@ -18,6 +18,6 @@ jobs:
       - name: Docker Build
         run: docker build -t inventory .
       - name: Start PostgreSQL
-        run: docker run -d --name postgres -e POSTGRES_PASSWORD=password -p 5433:5432 postgres:15
+        run: docker run -d --name postgres -e POSTGRES_PASSWORD=password -p 5433:5432 postgres:17
       - name: Run Tests
         run: go test ./... -v
